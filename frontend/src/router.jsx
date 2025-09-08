@@ -1,26 +1,26 @@
-import React from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Home from "./pages/Home/Home";
-import Menu from "./pages/Menu/Menu";
-import Order from "./pages/Order/Order";
+import React from 'react'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import Home from './pages/Home/Home'
+import Menu from './pages/Menu/Menu'
+import Order from './pages/Order/Order'
 
 const router = createBrowserRouter([
     {
-        path: "/",
-        element: <Home/>,
+        path: '/',
+        element: <Home />,
     },
     {
-        path: "/menu",
+        path: '/menu',
         element: <Menu />,
     },
     {
-        path: "/order",
+        path: '/order',
         element: <Order />,
     },
-]);
+])
 
 const AppRouter = () => {
-    return <RouterProvider router={router} />;
-};
+    return <RouterProvider router={router} />
+}
 
-export default AppRouter;
+export default AppRouter

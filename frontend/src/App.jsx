@@ -1,12 +1,12 @@
 import React from "react";
-import HomePage from "./pages/HomePage";
+import AppRouter from "./router";
 import "./styles/global.css";
 import "./App.css";
 
 function App() {
     return (
         <div className="App">
-            <HomePage />
+            <AppRouter />
         </div>
     );
 }

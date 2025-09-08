@@ -1,7 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
 
 const HomePage = () => {
+    const navigate = useNavigate();
+
     const features = [
         {
             id: "order",
@@ -9,6 +12,7 @@ const HomePage = () => {
             description:
                 "Tạo đơn hàng mới, quản lý order của khách hàng và theo dõi trạng thái phục vụ",
             icon: "fas fa-receipt",
+            onClick: () => navigate("/order"),
         },
         {
             id: "menu",
@@ -16,6 +20,7 @@ const HomePage = () => {
             description:
                 "Xem và chỉnh sửa menu đồ uống, cập nhật giá cả và thông tin sản phẩm",
             icon: "fas fa-coffee",
+            onClick: () => navigate("/menu"),
         },
         {
             id: "revenue",
@@ -23,6 +28,7 @@ const HomePage = () => {
             description:
                 "Theo dõi doanh số bán hàng, thống kê theo ngày, tuần, tháng và báo cáo tài chính",
             icon: "fas fa-chart-line",
+            onClick: () => navigate("/revenue"),
         },
     ];
 
@@ -48,7 +54,11 @@ const HomePage = () => {
                 <div className="features-section">
                     <div className="features-grid">
                         {features.map((feature) => (
-                            <div key={feature.id} className="feature-card">
+                            <div
+                                key={feature.id}
+                                className="feature-card"
+                                onClick={feature.onClick}
+                            >
                                 <div className="feature-icon">
                                     <i className={feature.icon}></i>
                                 </div>

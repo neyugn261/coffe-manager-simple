@@ -251,6 +251,12 @@
     .feature-card {
         padding: 1.25rem;
         border-radius: 15px;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: start;
+        align-items: center;
+        text-align: left;
     }
 
     .feature-icon {

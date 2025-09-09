@@ -1,151 +1,150 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import apiService from "../services/apiService";
-import "./MenuPage.css";
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import apiService from '../../services/apiService'
+import styles from './Menu.module.scss'
 
-const MenuPage = () => {
-    const navigate = useNavigate();
-    const [menuItems, setMenuItems] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [editingItem, setEditingItem] = useState(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("all");
-    const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+export default function Menu() {
+    const navigate = useNavigate()
+    const [menuItems, setMenuItems] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+    const [showAddForm, setShowAddForm] = useState(false)
+    const [editingItem, setEditingItem] = useState(null)
+    const [searchTerm, setSearchTerm] = useState('')
+    const [selectedCategory, setSelectedCategory] = useState('all')
+    const [showCategoryMenu, setShowCategoryMenu] = useState(false)
 
     // Form data cho thêm/sửa item
     const [formData, setFormData] = useState({
-        name: "",
-        price: "",
-        category: "other",
-        image_url: "",
-    });
+        name: '',
+        price: '',
+        category: 'other',
+        image_url: '',
+    })
 
     // Lấy danh sách menu khi component mount
     useEffect(() => {
-        fetchMenuItems();
-    }, []);
+        fetchMenuItems()
+    }, [])
 
     const fetchMenuItems = async () => {
         try {
-            setLoading(true);
-            const data = await apiService.menu.getAll();
-            setMenuItems(Array.isArray(data) ? data : []);
-            setError(null);
+            setLoading(true)
+            const data = await apiService.menu.getAll()
+            setMenuItems(Array.isArray(data) ? data : [])
+            setError(null)
         } catch (err) {
-            setError("Không thể tải danh sách menu. Vui lòng thử lại sau.");
-            console.error("Error fetching menu items:", err);
-            setMenuItems([]);
+            setError('Không thể tải danh sách menu. Vui lòng thử lại sau.')
+            console.error('Error fetching menu items:', err)
+            setMenuItems([])
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
-    };
+    }
 
     // Lọc menu items theo tìm kiếm và category
     const filteredItems = Array.isArray(menuItems)
         ? menuItems.filter((item) => {
               const matchesSearch =
-                  item.name &&
-                  item.name.toLowerCase().includes(searchTerm.toLowerCase());
+                  item.name && item.name.toLowerCase().includes(searchTerm.toLowerCase())
 
-              if (selectedCategory === "all") return matchesSearch;
+              if (selectedCategory === 'all') return matchesSearch
 
-              return matchesSearch && item.category === selectedCategory;
+              return matchesSearch && item.category === selectedCategory
           })
-        : [];
+        : []
 
     // Xử lý form submit
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        e.preventDefault()
         try {
             if (editingItem) {
-                await apiService.menu.update(editingItem.id, formData);
+                await apiService.menu.update(editingItem.id, formData)
             } else {
-                await apiService.menu.create(formData);
+                await apiService.menu.create(formData)
             }
 
             setFormData({
-                name: "",
-                price: "",
-                category: "other",
-                image_url: "",
-            });
-            setShowAddForm(false);
-            setEditingItem(null);
-            await fetchMenuItems();
+                name: '',
+                price: '',
+                category: 'other',
+                image_url: '',
+            })
+            setShowAddForm(false)
+            setEditingItem(null)
+            await fetchMenuItems()
         } catch (err) {
-            setError("Có lỗi xảy ra khi lưu dữ liệu.");
-            console.error("Error saving menu item:", err);
+            setError('Có lỗi xảy ra khi lưu dữ liệu.')
+            console.error('Error saving menu item:', err)
         }
-    };
+    }
 
     // Xử lý xóa item
     const handleDelete = async (id) => {
-        if (window.confirm("Bạn có chắc muốn xóa món này?")) {
+        if (window.confirm('Bạn có chắc muốn xóa món này?')) {
             try {
-                await apiService.menu.delete(id);
-                await fetchMenuItems();
+                await apiService.menu.delete(id)
+                await fetchMenuItems()
             } catch (err) {
-                setError("Có lỗi xảy ra khi xóa món.");
-                console.error("Error deleting menu item:", err);
+                setError('Có lỗi xảy ra khi xóa món.')
+                console.error('Error deleting menu item:', err)
             }
         }
-    };
+    }
 
     // Bắt đầu edit
     const startEdit = (item) => {
-        setEditingItem(item);
+        setEditingItem(item)
         setFormData({
             name: item.name,
             price: item.price,
-            category: item.category || "other",
-            image_url: item.image_url || "",
-        });
-        setShowAddForm(true);
-    };
+            category: item.category || 'other',
+            image_url: item.image_url || '',
+        })
+        setShowAddForm(true)
+    }
 
     // Cancel form
     const cancelForm = () => {
-        setShowAddForm(false);
-        setEditingItem(null);
-        setFormData({ name: "", price: "", category: "other", image_url: "" });
-    };
+        setShowAddForm(false)
+        setEditingItem(null)
+        setFormData({ name: '', price: '', category: 'other', image_url: '' })
+    }
 
     // Format giá tiền
     const formatPrice = (price) => {
-        return new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-        }).format(price);
-    };
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+        }).format(price)
+    }
 
     // Shared category label logic
     const categories = [
-        { value: "all", label: "📋 Tất cả" },
-        { value: "yaourt", label: "🍦 Yaourt" },
-        { value: "milkTea", label: "🧋 Trà sữa" },
-        { value: "soda", label: "🥤 Nước ngọt" },
-        { value: "fruitTea", label: "🍑 Trà trái cây" },
-        { value: "topping", label: "🍡 Topping" },
-        { value: "latte", label: "🥛 Latte" },
-        { value: "food", label: "🍟 Ăn vặt" },
-        { value: "coffee", label: "☕ Cà phê" },
-        { value: "milo-cacao", label: "🍫 Milo/Cacao" },
-        { value: "juice", label: "🍊 Nước ép" },
-        { value: "bottleDrink", label: "🍼 Nước chai" },
-        { value: "other", label: "✨ Khác" },
-    ];
+        { value: 'all', label: '📋 Tất cả' },
+        { value: 'yaourt', label: '🍦 Yaourt' },
+        { value: 'milkTea', label: '🧋 Trà sữa' },
+        { value: 'soda', label: '🥤 Nước ngọt' },
+        { value: 'fruitTea', label: '🍑 Trà trái cây' },
+        { value: 'topping', label: '🍡 Topping' },
+        { value: 'latte', label: '🥛 Latte' },
+        { value: 'food', label: '🍟 Ăn vặt' },
+        { value: 'coffee', label: '☕ Cà phê' },
+        { value: 'milo-cacao', label: '🍫 Milo/Cacao' },
+        { value: 'juice', label: '🍊 Nước ép' },
+        { value: 'bottleDrink', label: '🍼 Nước chai' },
+        { value: 'other', label: '✨ Khác' },
+    ]
 
     const getCategoryLabel = (category) => {
-        const found = categories.find((cat) => cat.value === category);
-        return found ? found.label : "🍽️ Khác";
-    };
+        const found = categories.find((cat) => cat.value === category)
+        return found ? found.label : '🍽️ Khác'
+    }
 
     const handleCategorySelect = (category) => {
-        setSelectedCategory(category);
-        setShowCategoryMenu(false);
-    };
+        setSelectedCategory(category)
+        setShowCategoryMenu(false)
+    }
 
     if (loading) {
         return (
@@ -155,63 +154,59 @@ const MenuPage = () => {
                     <p>Đang tải menu...</p>
                 </div>
             </div>
-        );
+        )
     }
 
     return (
-        <div className="page">
+        <div className={styles['page']}>
             {/* Header */}
-            <div className="page-header">
-                <div className="header-content">
-                    <button
-                        className="back-button"
-                        onClick={() => navigate("/")}
-                    >
+            <div className={styles['page-header']}>
+                <div className={styles['header-content']}>
+                    <button className={styles['back-button']} onClick={() => navigate('/')}>
                         <i className="fas fa-arrow-left"></i>
-                        <span className="btn-text">Về trang chủ</span>
+                        <span className={styles['btn-text']}>Về trang chủ</span>
                     </button>
 
-                    <div className="header-center">
-                        <h1 className="page-title">
+                    <div className={styles['header-center']}>
+                        <h1 className={styles['page-title']}>
                             <i className="fas fa-coffee"></i>
                             Danh sách Menu
                         </h1>
                     </div>
 
                     <button
-                        className="header-action-btn"
+                        className={styles['header-action-btn']}
                         onClick={() => setShowAddForm(true)}
                     >
                         <i className="fas fa-plus"></i>
-                        <span className="btn-text">Thêm món</span>
+                        <span className={styles['btn-text']}>Thêm món</span>
                     </button>
                 </div>
             </div>
 
-            <div className="page-content">
+            <div className={styles['page-content']}>
                 {/* Search and Category Filter */}
-                <div className="search-container">
-                    <div className="search-box">
+                <div className={styles['search-container']}>
+                    <div className={styles['search-box']}>
                         <i className="fas fa-search"></i>
                         <input
                             type="text"
                             placeholder="Tìm kiếm món..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="input-field"
+                            className={styles['input-field']}
                         />
                     </div>
 
-                    <div className="category-dropdown">
+                    <div className={styles['category-dropdown']}>
                         <select
                             value={selectedCategory}
-                            onChange={(e) =>
-                                setSelectedCategory(e.target.value)
-                            }
-                            className="category-select input-field"
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className={`${styles['category-select']} ${styles['input-field']}`}
                         >
                             {categories.map((category) => (
                                 <option
+                                    className={styles['category-option']}
                                     key={category.value}
                                     value={category.value}
                                 >
@@ -221,47 +216,46 @@ const MenuPage = () => {
                         </select>
 
                         <button
-                            className="category-toggle"
-                            onClick={() =>
-                                setShowCategoryMenu(!showCategoryMenu)
-                            }
+                            className={styles['category-toggle']}
+                            onClick={() => setShowCategoryMenu((prev) => !prev)}
                         >
                             <i className="fas fa-bars"></i>
                         </button>
 
-                        <div
-                            className={`category-menu ${
-                                showCategoryMenu ? "open" : ""
-                            }`}
-                        >
-                            {categories.map((category) => (
-                                <div
-                                    key={category.value}
-                                    className={`category-option ${
-                                        selectedCategory === category.value
-                                            ? "active"
-                                            : ""
-                                    }`}
-                                    onClick={() =>
-                                        handleCategorySelect(category.value)
-                                    }
+                        {showCategoryMenu === true ? (
+                            <div className={styles['category-menu']}>
+                                <button
+                                    className={styles['close-btn']}
+                                    onClick={() => setShowCategoryMenu((prev) => !prev)}
                                 >
-                                    {category.label}
-                                </div>
-                            ))}
-                        </div>
+                                    <i className="fas fa-times" />
+                                </button>
+                                {categories.map((category) => (
+                                    <div
+                                        key={category.value}
+                                        className={`${styles['category-option']} ${
+                                            selectedCategory === category.value
+                                                ? styles['active']
+                                                : ''
+                                        }`}
+                                        onClick={() => handleCategorySelect(category.value)}
+                                    >
+                                        {category.label}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            ''
+                        )}
                     </div>
                 </div>
 
                 {/* Error message */}
                 {error && (
-                    <div className="error-message">
+                    <div className={styles['error-message']}>
                         <i className="fas fa-exclamation-triangle"></i>
                         {error}
-                        <button
-                            onClick={() => setError(null)}
-                            className="close-error"
-                        >
+                        <button onClick={() => setError(null)} className={styles['close-error']}>
                             <i className="fas fa-times"></i>
                         </button>
                     </div>
@@ -269,24 +263,17 @@ const MenuPage = () => {
 
                 {/* Add/Edit Form Modal */}
                 {showAddForm && (
-                    <div className="modal-overlay">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h2>
-                                    {editingItem
-                                        ? "Chỉnh sửa món"
-                                        : "Thêm món mới"}
-                                </h2>
-                                <button
-                                    onClick={cancelForm}
-                                    className="close-modal"
-                                >
+                    <div className={styles['modal-overlay']}>
+                        <div className={styles['modal-content']}>
+                            <div className={styles['modal-header']}>
+                                <h2>{editingItem ? 'Chỉnh sửa món' : 'Thêm món mới'}</h2>
+                                <button onClick={cancelForm} className={styles['close-modal']}>
                                     <i className="fas fa-times"></i>
                                 </button>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="menu-form">
-                                <div className="form-group">
+                            <form onSubmit={handleSubmit} className={styles['menu-form']}>
+                                <div className={styles['form-group']}>
                                     <label>Tên món *</label>
                                     <input
                                         type="text"
@@ -299,12 +286,12 @@ const MenuPage = () => {
                                             })
                                         }
                                         placeholder="Nhập tên món..."
-                                        className="input-field"
+                                        className={styles['input-field']}
                                     />
                                 </div>
 
-                                <div className="form-row">
-                                    <div className="form-group">
+                                <div className={styles['form-row']}>
+                                    <div className={styles['form-group']}>
                                         <label>Giá *</label>
                                         <input
                                             type="number"
@@ -318,11 +305,11 @@ const MenuPage = () => {
                                             }
                                             placeholder="0"
                                             min="0"
-                                            className="input-field"
+                                            className={styles['input-field']}
                                         />
                                     </div>
 
-                                    <div className="form-group">
+                                    <div className={styles['form-group']}>
                                         <label>Danh mục *</label>
                                         <select
                                             required
@@ -333,26 +320,18 @@ const MenuPage = () => {
                                                     category: e.target.value,
                                                 })
                                             }
-                                            className="input-field"
+                                            className={styles['input-field']}
                                         >
-                                            <option value="coffee">
-                                                ☕ Cà phê
-                                            </option>
+                                            <option value="coffee">☕ Cà phê</option>
                                             <option value="tea">🍃 Trà</option>
-                                            <option value="juice">
-                                                🥤 Nước ép & Sinh tố
-                                            </option>
-                                            <option value="food">
-                                                🍞 Đồ ăn
-                                            </option>
-                                            <option value="other">
-                                                🍽️ Khác
-                                            </option>
+                                            <option value="juice">🥤 Nước ép & Sinh tố</option>
+                                            <option value="food">🍞 Đồ ăn</option>
+                                            <option value="other">🍽️ Khác</option>
                                         </select>
                                     </div>
                                 </div>
 
-                                <div className="form-group">
+                                <div className={styles['form-group']}>
                                     <label>URL hình ảnh</label>
                                     <input
                                         type="url"
@@ -364,23 +343,20 @@ const MenuPage = () => {
                                             })
                                         }
                                         placeholder="https://example.com/image.jpg"
-                                        className="input-field"
+                                        className={styles['input-field']}
                                     />
                                 </div>
 
-                                <div className="form-actions">
+                                <div className={styles['form-actions']}>
                                     <button
                                         type="button"
                                         onClick={cancelForm}
-                                        className="btn-secondary"
+                                        className={styles['btn-secondary']}
                                     >
                                         Hủy
                                     </button>
-                                    <button
-                                        type="submit"
-                                        className="btn-primary"
-                                    >
-                                        {editingItem ? "Cập nhật" : "Thêm món"}
+                                    <button type="submit" className={styles['btn-primary']}>
+                                        {editingItem ? 'Cập nhật' : 'Thêm món'}
                                     </button>
                                 </div>
                             </form>
@@ -390,12 +366,12 @@ const MenuPage = () => {
 
                 {/* Menu Items Grid */}
                 {filteredItems.length === 0 ? (
-                    <div className="empty-state">
+                    <div className={styles['empty-state']}>
                         <i className="fas fa-coffee"></i>
                         <h3>Chưa có món nào trong menu</h3>
                         <p>Hãy thêm món đầu tiên vào menu của bạn!</p>
                         <button
-                            className="btn-primary"
+                            className={styles['btn-primary']}
                             onClick={() => setShowAddForm(true)}
                         >
                             <i className="fas fa-plus"></i>
@@ -403,69 +379,65 @@ const MenuPage = () => {
                         </button>
                     </div>
                 ) : (
-                    <div className="menu-grid">
+                    <div className={styles['menu-grid']}>
                         {filteredItems.map((item) => (
                             <div
                                 key={item.id}
-                                className="menu-item-card glass-effect"
+                                className={`${styles['menu-item-card']} ${styles['glass-effect']}`}
                             >
-                                <div className="item-image">
+                                <div className={styles['item-image']}>
                                     {item.image_url ? (
                                         <img
                                             src={item.image_url}
                                             alt={item.name}
                                             onError={(e) => {
-                                                e.target.style.display = "none";
+                                                e.target.style.display = 'none'
                                                 e.target.parentNode.querySelector(
-                                                    ".image-placeholder"
-                                                ).style.display = "flex";
+                                                    '.image-placeholder',
+                                                ).style.display = 'flex'
                                             }}
                                         />
                                     ) : (
-                                        <div className="image-placeholder">
+                                        <div className={styles['image-placeholder']}>
                                             <i className="fas fa-coffee"></i>
                                         </div>
                                     )}
                                     {item.image_url && (
                                         <div
-                                            className="image-placeholder"
-                                            style={{ display: "none" }}
+                                            className={styles['image-placeholder']}
+                                            style={{ display: 'none' }}
                                         >
                                             <i className="fas fa-coffee"></i>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="item-content">
-                                    <div className="item-header">
-                                        <h3 className="item-name">
-                                            {item.name}
-                                        </h3>
-                                        <span className="item-price">
+                                <div className={styles['item-content']}>
+                                    <div className={styles['item-header']}>
+                                        <h3 className={styles['item-name']}>{item.name}</h3>
+                                        <span className={styles['item-price']}>
                                             {formatPrice(item.price)}
                                         </span>
                                     </div>
-                                    <div className="item-details">
+                                    <div className={styles['item-details']}>
                                         {item.category && (
-                                            <span className="item-category">
-                                                {getCategoryLabel(
-                                                    item.category
-                                                )}
+                                            <span className={styles['item-category']}>
+                                                {getCategoryLabel(item.category)}
                                             </span>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className="item-actions">
+                                <div className={styles['item-actions']}>
                                     <button
-                                        className="btn-secondary edit-btn"
+                                        className={`${styles['btn-secondary']} ${styles['edit-btn']}`}
                                         onClick={() => startEdit(item)}
                                         title="Chỉnh sửa"
                                     >
                                         <i className="fas fa-edit"></i>
                                     </button>
                                     <button
-                                        className="delete-btn"
+                                        className={styles['delete-btn']}
                                         onClick={() => handleDelete(item.id)}
                                         title="Xóa"
                                     >
@@ -478,7 +450,5 @@ const MenuPage = () => {
                 )}
             </div>
         </div>
-    );
-};
-
-export default MenuPage;
+    )
+}

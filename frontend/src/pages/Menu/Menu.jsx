@@ -205,7 +205,11 @@ export default function Menu() {
                             className={`${styles['category-select']} ${styles['input-field']}`}
                         >
                             {categories.map((category) => (
-                                <option key={category.value} value={category.value}>
+                                <option
+                                    className={styles['category-option']}
+                                    key={category.value}
+                                    value={category.value}
+                                >
                                     {category.label}
                                 </option>
                             ))}
@@ -213,28 +217,36 @@ export default function Menu() {
 
                         <button
                             className={styles['category-toggle']}
-                            onClick={() => setShowCategoryMenu(!showCategoryMenu)}
+                            onClick={() => setShowCategoryMenu((prev) => !prev)}
                         >
                             <i className="fas fa-bars"></i>
                         </button>
 
-                        <div
-                            className={`${styles['category-menu']} ${
-                                showCategoryMenu ? styles['open'] : ''
-                            }`}
-                        >
-                            {categories.map((category) => (
-                                <div
-                                    key={category.value}
-                                    className={`${styles['category-option']} ${
-                                        selectedCategory === category.value ? styles['active'] : ''
-                                    }`}
-                                    onClick={() => handleCategorySelect(category.value)}
+                        {showCategoryMenu === true ? (
+                            <div className={styles['category-menu']}>
+                                <button
+                                    className={styles['close-btn']}
+                                    onClick={() => setShowCategoryMenu((prev) => !prev)}
                                 >
-                                    {category.label}
-                                </div>
-                            ))}
-                        </div>
+                                    <i className="fas fa-times" />
+                                </button>
+                                {categories.map((category) => (
+                                    <div
+                                        key={category.value}
+                                        className={`${styles['category-option']} ${
+                                            selectedCategory === category.value
+                                                ? styles['active']
+                                                : ''
+                                        }`}
+                                        onClick={() => handleCategorySelect(category.value)}
+                                    >
+                                        {category.label}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            ''
+                        )}
                     </div>
                 </div>
 

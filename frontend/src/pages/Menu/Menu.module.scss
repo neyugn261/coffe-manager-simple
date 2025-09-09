@@ -91,6 +91,18 @@ $transition: var(--transition-normal);
     padding: 1.25rem;
 }
 
+/* Chrome, Safari, Edge */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+    -moz-appearance: textfield;
+}
+
 /* Inputs dùng chung */
 .input-field {
     width: 100%;
@@ -173,16 +185,20 @@ $transition: var(--transition-normal);
 
         .category-select {
             @extend .input-field;
+            cursor: pointer;
+
+            .category-option {
+                background: var(--bg-modal);
+                cursor: pointer;
+            }
         }
 
         .category-toggle {
             display: none;
             width: 100%;
             @extend .input-field;
-            display: none;
             justify-content: space-between;
             align-items: center;
-
             &:hover {
                 background: var(--bg-input-focus);
                 border-color: var(--accent-color);
@@ -190,30 +206,39 @@ $transition: var(--transition-normal);
         }
 
         .category-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
+            position: fixed;
+            top: 0;
             left: 0;
             right: 0;
+            bottom: 0;
             background: var(--bg-modal);
             border: 1px solid var(--border-glass);
-            border-radius: $radius-sm;
             box-shadow: var(--shadow-lg);
             z-index: 10;
-            max-height: 200px;
             overflow-y: auto;
 
-            &.open {
-                display: block;
+            padding: 1rem 0;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            gap: 1rem;
+
+            .close-btn {
+                align-self: flex-end;
+                padding: 1rem;
+                margin-right: 2rem;
+                &i {
+                    width: 10rem;
+                }
             }
 
             .category-option {
-                padding: 0.75rem 1rem;
+                padding: 1rem;
                 cursor: pointer;
                 transition: $transition;
                 border-bottom: 1px solid var(--border-glass);
                 color: var(--text-primary);
-
                 &:last-child {
                     border-bottom: 0;
                 }
@@ -232,9 +257,8 @@ $transition: var(--transition-normal);
 /* Grid */
 .menu-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
 
     .menu-item-card {
         @include card;
@@ -447,6 +471,11 @@ $transition: var(--transition-normal);
             .form-group {
                 margin-bottom: 1.5rem;
 
+                option {
+                    background: var(--bg-modal);
+                    cursor: pointer;
+                }
+
                 label {
                     display: block;
                     margin-bottom: 0.5rem;
@@ -601,6 +630,11 @@ $transition: var(--transition-normal);
 }
 
 @media (max-width: 480px) {
+    .back-button {
+        .btn-text {
+            display: none;
+        }
+    }
     .search-container {
         flex-direction: row !important;
         align-items: center;
@@ -610,12 +644,6 @@ $transition: var(--transition-normal);
         .search-box {
             flex: 1;
             min-width: 0;
-
-            .input-field {
-                font-size: 16px; /* tránh zoom iOS */
-                padding: 0.6rem 1rem 0.6rem 2.5rem;
-            }
-
             i {
                 left: 0.8rem;
                 font-size: 0.9rem;

@@ -1,6 +1,5 @@
-
 export default function Home() {
   return (
-    <div></div>
+    <div className="font-black block h-32 "></div>
   );
 }

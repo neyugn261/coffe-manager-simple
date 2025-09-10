@@ -1,13 +1,63 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
-:root {
-    --background: #ffffff;
-    --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
-@theme {
+@theme inline {
+    /* Colors */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-element: var(--element);
+}
+
+:root {
+    /* Background */
+    --background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    --foreground: #ffffff;
+
+    /* Accent */
+    --accent: #4caf50;
+    --accent-hover: #45a049;
+    --accent-shadow: rgba(76, 175, 80, 0.3);
+
+    /* Primary */
+    --primary: #1a1a1a;
+    --primary-foreground: #2d2d2d;
+
+    /* Secondary */
+    --secondary: rgba(255, 255, 255, 0.05);
+    --secondary-hover: rgba(255, 255, 255, 0.08);
+    --secondary-foreground: #b0b0b0;
+
+    /* Element */
+    --element: #2d2d2d;
+
+    /* Input */
+    --bg-input: rgba(255, 255, 255, 0.1);
+    --bg-input-focus: rgba(255, 255, 255, 0.15);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    html,
+    body {
+        @apply bg-background text-foreground;
+        font-family: var(--font-text), system-ui, sans-serif;
+    }
+
+    .font-title {
+        font-family: var(--font-title), sans-serif;
+    }
+
+    .font-accent {
+        font-family: var(--font-accent), cursive;
+    }
 }

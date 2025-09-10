@@ -167,7 +167,13 @@ export default function Order() {
                 notes: orderForm.notes || null,
             }
 
-            await apiService.order.create(orderData)
+            // Sử dụng API mới theo order_type
+            if (orderForm.order_type === 'takeaway') {
+                await apiService.order.createTakeaway(orderData)
+            } else {
+                // dine_in - tạo order cho bàn
+                await apiService.order.createForTable(orderData.table_number, orderData)
+            }
 
             // Reset form and cart
             setCartItems([])

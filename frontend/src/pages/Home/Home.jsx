@@ -1,8 +1,16 @@
 import { useNavigate } from 'react-router-dom'
+import { authUtils } from '../../utils/auth'
 import styles from './Home.module.scss'
 
 export default function Home() {
     const navigate = useNavigate()
+
+    const handleLogout = () => {
+        if (confirm('Bạn có chắc muốn đăng xuất?')) {
+            authUtils.removeApiKey()
+            navigate('/login')
+        }
+    }
 
     const features = [
         {
@@ -50,6 +58,16 @@ export default function Home() {
 
                 {/* Right Side - Features Section */}
                 <div className={styles['features-section']}>
+                    <div className={styles['features-header']}>
+                        <button
+                            className={styles['logout-btn']}
+                            onClick={handleLogout}
+                            title="Đăng xuất"
+                        >
+                            <i className="fas fa-sign-out-alt"></i>
+                            Đăng xuất
+                        </button>
+                    </div>
                     <div className={styles['features-grid']}>
                         {features.map((feature) => (
                             <div

@@ -29,10 +29,10 @@ class MenuRepository {
     async create(menuItem) {
         const connection = await pool.getConnection();
         try {
-            const { name, price, unit, image_url } = menuItem;
+            const { name, price, category, image_url } = menuItem;
             const [result] = await connection.execute(
-                "INSERT INTO menu_items (name, price, unit, image_url) VALUES (?, ?, ?, ?)",
-                [name, price, unit, image_url]
+                "INSERT INTO menu_items (name, price, category, image_url) VALUES (?, ?, ?, ?)",
+                [name, price, category, image_url]
             );
             return { id: result.insertId, ...menuItem };
         } finally {
@@ -40,15 +40,19 @@ class MenuRepository {
         }
     }
 
-    async update(id, menuItem) {
+    async update(id, updateData) {
         const connection = await pool.getConnection();
         try {
-            const { name, price, unit, image_url } = menuItem;
-            await connection.execute(
-                "UPDATE menu_items SET name = ?, price = ?, unit = ?, image_url = ? WHERE id = ?",
-                [name, price, unit, image_url, id]
-            );
-            return { id, ...menuItem };
+            // Tạo dynamic SQL dựa trên các trường cần update
+            const fields = Object.keys(updateData);
+            const values = Object.values(updateData);
+            if (fields.length === 0) {
+                throw new Error("No fields to update");
+            }
+            const setClause = fields.map(field => `${field} = ?`).join(', ');
+            const sql = `UPDATE menu_items SET ${setClause} WHERE id = ?`;
+            const [result] = await connection.execute(sql, [...values, id]);
+            return result.affectedRows > 0;
         } finally {
             connection.release();
         }

@@ -1,22 +1,31 @@
 const orderRepository = require("../repositories/orderRepository");
 const menuRepository = require("../repositories/menuRepository");
+const createError = require("../utils/createError");
 
 class OrderService {
     async getAllOrders() {
-        return await orderRepository.findAll();
+        try {   
+         return await orderRepository.findAll();
+        } catch (error) {
+            throw createError(`Error retrieving orders: ${error.message}`, 500);
+        }
     }
 
     async getOrderById(id) {
-        if (!id || isNaN(id)) {
-            throw new Error("ID đơn hàng không hợp lệ");
-        }
+        try {
+            if (!id || isNaN(id)) {
+                throw createError("Invalid order ID", 400);
+            }
 
-        const order = await orderRepository.findById(id);
-        if (!order) {
-            throw new Error("Không tìm thấy đơn hàng");
-        }
+            const order = await orderRepository.findById(id);
+            if (!order) {
+                throw createError("Order not found", 404);
+            }
 
-        return order;
+            return order;
+        } catch (error) {
+            throw createError(`Error retrieving order ${id}: ${error.message}`, 500);
+        }
     }
 
     async createOrder(orderData) {
@@ -24,23 +33,23 @@ class OrderService {
             items,
             customer_name,
             order_type = "takeaway",
-            table_number,
+            table_id,
             notes,
         } = orderData;
 
         // Validate dữ liệu
         if (!items || !Array.isArray(items) || items.length === 0) {
-            throw new Error("Đơn hàng phải có ít nhất 1 món");
+            throw createError("Order must contain at least 1 item", 400);
         }
 
         // Validate order_type
         if (!["takeaway", "dine_in"].includes(order_type)) {
-            throw new Error("Loại đơn hàng không hợp lệ");
+            throw createError("Invalid order type", 400);
         }
 
-        // Nếu là dine_in thì phải có table_number
-        if (order_type === "dine_in" && !table_number) {
-            throw new Error("Đơn hàng ngồi uống tại quán phải có số bàn");
+        // Nếu là dine_in thì phải có table_id
+        if (order_type === "dine_in" && !table_id) {
+            throw createError("Dine-in orders must have a table_id", 400);
         }
 
         let total = 0;
@@ -51,13 +60,13 @@ class OrderService {
             const { menu_item_id, quantity } = item;
 
             if (!menu_item_id || !quantity || quantity <= 0) {
-                throw new Error("Thông tin món ăn không hợp lệ");
+                throw createError("Invalid item data", 400);
             }
 
             // Kiểm tra món ăn có tồn tại không
             const menuItem = await menuRepository.findById(menu_item_id);
             if (!menuItem) {
-                throw new Error(`Không tìm thấy món ăn với ID ${menu_item_id}`);
+                throw createError(`Menu item not found: ${menu_item_id}`, 404);
             }
 
             const itemTotal = menuItem.price * quantity;
@@ -69,110 +78,107 @@ class OrderService {
                 price: menuItem.price,
             });
         }
-
-        return await orderRepository.create({
-            items: validatedItems,
-            total: parseFloat(total.toFixed(2)),
-            customer_name: customer_name || null,
-            order_type,
-            table_number: order_type === "dine_in" ? table_number : null,
-            notes: notes || null,
-        });
+        try {
+            return await orderRepository.create({
+                items: validatedItems,
+                total: parseFloat(total.toFixed(2)),
+                customer_name: customer_name || null,
+                order_type,
+                table_id: order_type === "dine_in" ? table_id : null,
+                notes: notes || null,
+            });
+        } catch (error) {
+            throw createError(`Error creating order: ${error.message}`, 500);
+        }
     }
 
     async deleteOrder(id) {
         if (!id || isNaN(id)) {
-            throw new Error("ID đơn hàng không hợp lệ");
+            throw createError("Invalid order ID", 400);
         }
-
-        // Kiểm tra đơn hàng có tồn tại không
-        await this.getOrderById(id);
-
-        return await orderRepository.delete(id);
+        try {
+            // Kiểm tra đơn hàng có tồn tại không
+            await this.getOrderById(id);
+            return await orderRepository.delete(id);
+        } catch (error) {
+            throw createError(`Error deleting order ${id}: ${error.message}`, 500);
+        }
     }
 
     async getOrderStatistics() {
-        const orders = await orderRepository.findAll();
+        try {
+            const orders = await orderRepository.findAll();
 
-        const totalOrders = orders.length;
-        const totalRevenue = orders.reduce(
-            (sum, order) => sum + parseFloat(order.total),
-            0
-        );
-        const averageOrderValue =
-            totalOrders > 0 ? totalRevenue / totalOrders : 0;
+            const totalOrders = orders.length;
+            const totalRevenue = orders.reduce(
+                (sum, order) => sum + parseFloat(order.total),
+                0
+            );
+            const averageOrderValue =
+                totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-        return {
-            totalOrders,
-            totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-            averageOrderValue: parseFloat(averageOrderValue.toFixed(2)),
-        };
-    }
-
-    // Cập nhật trạng thái đơn hàng
-    async updateOrderStatus(id, status) {
-        if (!id || isNaN(id)) {
-            throw new Error("ID đơn hàng không hợp lệ");
+            return {
+                totalOrders,
+                totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+                averageOrderValue: parseFloat(averageOrderValue.toFixed(2)),
+            };
+        } catch (error) {
+            throw createError(`Error retrieving order statistics: ${error.message}`, 500);
         }
-
-        const validStatuses = [
-            "pending",
-            "preparing",
-            "ready",
-            "completed",
-            "cancelled",
-        ];
-        if (!validStatuses.includes(status)) {
-            throw new Error("Trạng thái đơn hàng không hợp lệ");
-        }
-
-        // Kiểm tra đơn hàng có tồn tại không
-        await this.getOrderById(id);
-
-        return await orderRepository.updateStatus(id, status);
     }
 
     // Cập nhật trạng thái thanh toán
     async updatePaymentStatus(id, payment_status) {
         if (!id || isNaN(id)) {
-            throw new Error("ID đơn hàng không hợp lệ");
+            throw createError("Invalid order ID", 400);
         }
 
         const validPaymentStatuses = ["unpaid", "paid"];
         if (!validPaymentStatuses.includes(payment_status)) {
-            throw new Error("Trạng thái thanh toán không hợp lệ");
+            throw createError("Invalid payment status", 400);
         }
+        try {
+            // Kiểm tra đơn hàng có tồn tại không
+            await this.getOrderById(id);
 
-        // Kiểm tra đơn hàng có tồn tại không
-        await this.getOrderById(id);
-
-        return await orderRepository.updatePaymentStatus(id, payment_status);
-    }
-
-    // Lấy đơn hàng theo trạng thái
-    async getOrdersByStatus(status) {
-        const validStatuses = [
-            "pending",
-            "preparing",
-            "ready",
-            "completed",
-            "cancelled",
-        ];
-        if (!validStatuses.includes(status)) {
-            throw new Error("Trạng thái đơn hàng không hợp lệ");
+            return await orderRepository.updatePaymentStatus(id, payment_status);
+        } catch (error) {
+            throw createError(`Error updating payment status: ${error.message}`, 500);
         }
-
-        return await orderRepository.findByStatus(status);
     }
 
     // Lấy đơn hàng theo trạng thái thanh toán
     async getOrdersByPaymentStatus(payment_status) {
         const validPaymentStatuses = ["unpaid", "paid"];
         if (!validPaymentStatuses.includes(payment_status)) {
-            throw new Error("Trạng thái thanh toán không hợp lệ");
+            throw createError("Invalid payment status", 400);
         }
+        try {
+            return await orderRepository.findByPaymentStatus(payment_status);
+        } catch (error) {
+            throw createError(`Error retrieving orders by payment status: ${error.message}`, 500);
+        }
+    }
 
-        return await orderRepository.findByPaymentStatus(payment_status);
+    // Lấy order của bàn
+    async getOrdersByTable(tableId) {
+        if (!tableId || isNaN(tableId)) {
+            throw createError("Invalid table ID", 400);
+        }
+        try {
+            return await orderRepository.findByTableId(tableId);
+        } catch (error) {
+            throw createError(`Error retrieving orders by table ID: ${error.message}`, 500);
+        }
+    }
+
+    // Lấy order mang đi
+    async getTakeawayOrders() {
+        try {
+            return await orderRepository.findByOrderType('takeaway');
+        } catch (error) {
+            throw createError(`Error retrieving takeaway orders: ${error.message}`, 500);
+        }
     }
 }
 

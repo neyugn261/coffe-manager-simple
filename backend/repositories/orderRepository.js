@@ -57,12 +57,12 @@ class OrderRepository {
 
             // Tạo order
             const [orderResult] = await connection.execute(
-                `INSERT INTO orders (customer_name, order_type, table_number, notes, total) 
+                `INSERT INTO orders (customer_name, order_type, table_id, notes, total) 
                  VALUES (?, ?, ?, ?, ?)`,
                 [
                     orderData.customer_name,
                     orderData.order_type,
-                    orderData.table_number,
+                    orderData.table_id || null,
                     orderData.notes,
                     orderData.total,
                 ]
@@ -108,20 +108,6 @@ class OrderRepository {
         }
     }
 
-    // Cập nhật trạng thái đơn hàng
-    async updateStatus(id, status) {
-        const connection = await pool.getConnection();
-        try {
-            const [result] = await connection.execute(
-                "UPDATE orders SET status = ? WHERE id = ?",
-                [status, id]
-            );
-            return result.affectedRows > 0;
-        } finally {
-            connection.release();
-        }
-    }
-
     // Cập nhật trạng thái thanh toán
     async updatePaymentStatus(id, payment_status) {
         const connection = await pool.getConnection();
@@ -137,31 +123,7 @@ class OrderRepository {
         }
     }
 
-    // Lấy đơn hàng theo trạng thái
-    async findByStatus(status) {
-        const connection = await pool.getConnection();
-        try {
-            const [rows] = await connection.execute(
-                `
-                SELECT o.*, 
-                       GROUP_CONCAT(
-                         CONCAT(od.quantity, 'x ', mi.name, ' (', FORMAT(od.price, 0), '₫)')
-                         SEPARATOR ', '
-                       ) as items_summary
-                FROM orders o
-                LEFT JOIN order_details od ON o.id = od.order_id
-                LEFT JOIN menu_items mi ON od.menu_item_id = mi.id
-                WHERE o.status = ?
-                GROUP BY o.id
-                ORDER BY o.created_at DESC
-            `,
-                [status]
-            );
-            return rows;
-        } finally {
-            connection.release();
-        }
-    }
+
 
     // Lấy đơn hàng theo trạng thái thanh toán
     async findByPaymentStatus(payment_status) {
@@ -182,6 +144,58 @@ class OrderRepository {
                 ORDER BY o.created_at DESC
             `,
                 [payment_status]
+            );
+            return rows;
+        } finally {
+            connection.release();
+        }
+    }
+
+    // Lấy order theo table_id
+    async findByTableId(tableId) {
+        const connection = await pool.getConnection();
+        try {
+            const [rows] = await connection.execute(
+                `
+                SELECT o.*, 
+                       GROUP_CONCAT(
+                         CONCAT(od.quantity, 'x ', mi.name, ' (', FORMAT(od.price, 0), '₫)')
+                         SEPARATOR ', '
+                       ) as items_summary
+                FROM orders o
+                LEFT JOIN order_details od ON o.id = od.order_id
+                LEFT JOIN menu_items mi ON od.menu_item_id = mi.id
+                WHERE o.table_id = ?
+                GROUP BY o.id
+                ORDER BY o.created_at DESC
+            `,
+                [tableId]
+            );
+            return rows;
+        } finally {
+            connection.release();
+        }
+    }
+
+    // Lấy order theo order_type
+    async findByOrderType(orderType) {
+        const connection = await pool.getConnection();
+        try {
+            const [rows] = await connection.execute(
+                `
+                SELECT o.*, 
+                       GROUP_CONCAT(
+                         CONCAT(od.quantity, 'x ', mi.name, ' (', FORMAT(od.price, 0), '₫)')
+                         SEPARATOR ', '
+                       ) as items_summary
+                FROM orders o
+                LEFT JOIN order_details od ON o.id = od.order_id
+                LEFT JOIN menu_items mi ON od.menu_item_id = mi.id
+                WHERE o.order_type = ?
+                GROUP BY o.id
+                ORDER BY o.created_at DESC
+            `,
+                [orderType]
             );
             return rows;
         } finally {

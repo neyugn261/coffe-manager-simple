@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import Footer from '@/layouts/Footer'
 
 const text = Inter({
     variable: '--font-text',
@@ -21,7 +22,12 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${text.variable} antialiased`}>{children}</body>
+            <body
+                className={`${text.variable} flex min-h-svh w-svw flex-col justify-between bg-[image:var(--background)] antialiased`}
+            >
+                <div className="flex-1">{children}</div>
+                <Footer />
+            </body>
         </html>
     )
 }

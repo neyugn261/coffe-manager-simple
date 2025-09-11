@@ -35,7 +35,7 @@ class MenuController {
             const menuItem = await menuService.createMenuItem(req.body);
             res.status(201).json({
                 status: "success",
-                message: "Tạo món ăn thành công",
+                message: "Create item successfully",
                 data: menuItem,
             });
         } catch (error) {
@@ -43,14 +43,14 @@ class MenuController {
         }
     }
 
-    // PUT /api/menu/:id
+    // PATCH /api/menu/:id
     async updateMenuItem(req, res, next) {
         try {
             const { id } = req.params;
             const menuItem = await menuService.updateMenuItem(id, req.body);
             res.json({
                 status: "success",
-                message: "Cập nhật món ăn thành công",
+                message: "Update item successfully",
                 data: menuItem,
             });
         } catch (error) {
@@ -65,7 +65,7 @@ class MenuController {
             await menuService.deleteMenuItem(id);
             res.json({
                 status: "success",
-                message: "Xóa món ăn thành công",
+                message: "Delete item successfully",
             });
         } catch (error) {
             next(error);

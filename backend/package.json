@@ -5,8 +5,8 @@
     "scripts": {
         "start": "node index.js",
         "dev": "node index.js",
-        "migrate": "node migrate.js create",
-        "migrate:reset": "node migrate.js reset",
+        "migrate": "node migrate-cli.js migrate",
+        "migrate:reset": "node migrate-cli.js reset",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],

@@ -13,19 +13,19 @@ const createTablesSQL = {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   `,
 
-    // Bảng orders (đơn hàng)
+    // Bảng orders (đơn hàng) - chỉ có 2 trạng thái: chưa thanh toán và đã thanh toán
     orders: `
     CREATE TABLE IF NOT EXISTS orders (
       id INT AUTO_INCREMENT PRIMARY KEY,
+      table_id INT NULL,
       customer_name VARCHAR(255),
       order_type ENUM('takeaway', 'dine_in') DEFAULT 'takeaway',
-      table_number INT NULL,
-      status ENUM('pending', 'preparing', 'ready', 'completed', 'cancelled') DEFAULT 'pending',
       payment_status ENUM('unpaid', 'paid') DEFAULT 'unpaid',
       notes TEXT,
       total DECIMAL(10,2) NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      paid_at DATETIME NULL
+      paid_at DATETIME NULL,
+      FOREIGN KEY (table_id) REFERENCES tables(id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   `,
 
@@ -39,6 +39,31 @@ const createTablesSQL = {
       price DECIMAL(10,2),
       FOREIGN KEY (order_id) REFERENCES orders(id),
       FOREIGN KEY (menu_item_id) REFERENCES menu_items(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `,
+
+    // Bảng api_keys (xác thực đơn giản)
+    api_keys: `
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      api_key VARCHAR(255) UNIQUE NOT NULL,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `,
+
+    // Bảng tables (quản lý bàn)
+    tables: `
+    CREATE TABLE IF NOT EXISTS tables (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      table_name VARCHAR(50) NOT NULL UNIQUE,
+      status ENUM('empty', 'occupied') DEFAULT 'empty',
+      is_merged BOOLEAN DEFAULT FALSE,
+      host_id INT NULL,
+      merged_tables JSON NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (host_id) REFERENCES tables(id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   `,
 };
@@ -63,6 +88,21 @@ const sampleData = {
     category = VALUES(category),
     image_url = VALUES(image_url);
   `,
+
+    tables: `
+    INSERT INTO tables (id, table_name, status) VALUES
+    (1, 'Bàn 01', 'empty'),
+    (2, 'Bàn 02', 'empty'),
+    (3, 'Bàn 03', 'empty'),
+    (4, 'Bàn 04', 'empty'),
+    (5, 'Bàn VIP 01', 'empty'),
+    (6, 'Bàn VIP 02', 'empty'),
+    (7, 'Bàn Góc', 'empty'),
+    (8, 'Bàn Ngoài Trời', 'empty')
+    ON DUPLICATE KEY UPDATE
+    table_name = VALUES(table_name),
+    status = VALUES(status);
+  `,
 };
 
 async function createTables() {
@@ -72,7 +112,7 @@ async function createTables() {
         console.log("🔨 Bắt đầu tạo bảng database đơn giản...");
 
         // Tạo từng bảng theo thứ tự (quan trọng vì có foreign key)
-        const tableOrder = ["menu_items", "orders", "order_details"];
+        const tableOrder = ["menu_items", "tables", "orders", "order_details", "api_keys"];
 
         for (const tableName of tableOrder) {
             console.log(`📋 Tạo bảng: ${tableName}`);
@@ -100,6 +140,10 @@ async function insertSampleData() {
         await connection.execute(sampleData.menu_items);
         console.log(`✅ Dữ liệu menu items đã thêm thành công`);
 
+        console.log(`📊 Thêm dữ liệu tables`);
+        await connection.execute(sampleData.tables);
+        console.log(`✅ Dữ liệu tables đã thêm thành công`);
+
         console.log("🎉 Tất cả dữ liệu mẫu đã được thêm!");
         return true;
     } catch (error) {
@@ -119,7 +163,7 @@ async function dropAllTables() {
         // Tắt foreign key checks để có thể xóa bảng
         await connection.execute("SET FOREIGN_KEY_CHECKS = 0");
 
-        const tables = ["order_details", "orders", "menu_items"];
+        const tables = ["order_details", "orders", "tables", "menu_items", "api_keys"];
 
         for (const table of tables) {
             await connection.execute(`DROP TABLE IF EXISTS ${table}`);

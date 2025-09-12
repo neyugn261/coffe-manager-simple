@@ -24,8 +24,8 @@ class TableService {
             }            
             return table;
         } catch (error) {
-            if (error.statusCode) {
-                throw error;
+            if (error.status === 404) {
+                throw error; // Rethrow lỗi không tìm thấy
             }
             throw createError(`Error retrieving table ${id}: ${error.message}`, 500);
         }
@@ -47,18 +47,24 @@ class TableService {
 
             return await tableRepository.createTable(tableData);
         } catch (error) {
+            if (error.status === 409) {
+                throw error; // Rethrow lỗi trùng tên
+            }
             throw createError(`Error creating table: ${error.message}`, 500);
         }
     }
 
     // Cập nhật trạng thái bàn
     async updateTableStatus(id, status) {
-        try {
-            const validStatuses = ['empty', 'occupied'];
-            if (!validStatuses.includes(status)) {
-                throw createError('Invalid table status', 400);
-            }
+        if (!id || isNaN(id)) {
+            throw createError('Invalid table ID', 400);
+        }
 
+        const validStatuses = ['empty', 'occupied'];
+        if (!validStatuses.includes(status)) {
+            throw createError('Invalid table status', 400);
+        }
+        try {
             const table = await tableRepository.getTableById(id);
             if (!table) {
                 throw createError('Table not found', 404);
@@ -66,6 +72,9 @@ class TableService {
 
             return await tableRepository.updateTableStatus(id, status);
         } catch (error) {
+            if (error.status === 404) {
+                throw error; // Rethrow lỗi không tìm thấy
+            }
             throw createError(`Error updating table status: ${error.message}`, 500);
         }
     }
@@ -75,16 +84,15 @@ class TableService {
         if (!hostId || !tableIds) {
             throw createError('Host ID and table IDs are required', 400);
         }
-        try {
-            // Validate input
-            if (!Array.isArray(tableIds) || tableIds.length < 1) {
-                throw createError('At least 1 child table is required to merge', 400);
-            }
+        // Validate input
+        if (!Array.isArray(tableIds) || tableIds.length < 1) {
+            throw createError('At least 1 child table is required to merge', 400);
+        }
 
-            if (tableIds.includes(hostId)) {
-                throw createError('Host table should not be included in child table list', 400);
-            }
-
+        if (tableIds.includes(hostId)) {
+            throw createError('Host table should not be included in child table list', 400);
+        }
+        try {           
             // Kiểm tra host table
             const hostTable = await tableRepository.getTableById(hostId);
             if (!hostTable) {
@@ -211,6 +219,9 @@ class TableService {
 
             return await tableRepository.updateTableStatus(id, 'occupied');
         } catch (error) {
+            if (error.status === 404) {
+                throw error; // Rethrow lỗi không tìm thấy
+            }
             throw createError(`Error occupying table: ${error.message}`, 500);
         }
     }
@@ -232,6 +243,9 @@ class TableService {
 
             return await tableRepository.updateTableStatus(id, 'empty');
         } catch (error) {
+            if (error.status === 404) {
+                throw error; // Rethrow lỗi không tìm thấy
+            }
             throw createError(`Error checking out table: ${error.message}`, 500);
         }
     }

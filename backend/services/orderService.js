@@ -5,18 +5,17 @@ const createError = require("../utils/createError");
 class OrderService {
     async getAllOrders() {
         try {   
-         return await orderRepository.findAll();
+            return await orderRepository.findAll();
         } catch (error) {
             throw createError(`Error retrieving orders: ${error.message}`, 500);
         }
     }
 
     async getOrderById(id) {
-        try {
-            if (!id || isNaN(id)) {
-                throw createError("Invalid order ID", 400);
-            }
-
+        if (!id || isNaN(id)) {
+            throw createError("Invalid order ID", 400);
+        }
+        try {            
             const order = await orderRepository.findById(id);
             if (!order) {
                 throw createError("Order not found", 404);
@@ -24,6 +23,9 @@ class OrderService {
 
             return order;
         } catch (error) {
+            if (error.status === 404) {
+                throw error; // Rethrow lỗi không tìm thấy
+            }
             throw createError(`Error retrieving order ${id}: ${error.message}`, 500);
         }
     }

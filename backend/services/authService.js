@@ -63,18 +63,20 @@ class AuthService {
 
             return keyData; // Chỉ return data khi thành công
         } catch (error) {
+            if (error.status === 401) {
+                throw error; // Rethrow lỗi xác thực
+            }
             throw createError(`Error authenticating API key: ${error.message}`, 500);
         }
     }
 
     // Middleware xác thực API key
     async authenticateApiKey(req, res, next) {
-        try {
-            const authHeader = req.headers.authorization;
-            
-            if (!authHeader || !authHeader.startsWith("Bearer ")) {
-                throw createError("Authorization header missing or malformed", 401);
-            }
+        const authHeader = req.headers.authorization;            
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            throw createError("Authorization header missing or malformed", 401);
+        }
+        try {            
 
             const apiKey = authHeader.substring(7); // Bỏ "Bearer "
             const keyData = await this.validateApiKey(apiKey);
@@ -103,6 +105,9 @@ class AuthService {
                 createdAt: keyData.created_at
             };
         } catch (error) {
+            if (error.status === 404) { 
+                throw error; // Rethrow lỗi không tìm thấy
+            }
             throw createError(`Error retrieving API key information: ${error.message}`, 500);
         }
     }

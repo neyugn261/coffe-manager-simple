@@ -4,7 +4,11 @@ const errorHandler = (err, req, res, next) => {
 
     // Lấy statusCode từ error object hoặc mặc định 500
     const statusCode = err.statusCode || err.status || 500;
-    const message =  "Internal Server Error";
+    if(statusCode === 500) {
+        message = "Internal Server Error";
+    } else {
+        message = err.message;
+    }
 
     res.status(statusCode).json({
         success: false,

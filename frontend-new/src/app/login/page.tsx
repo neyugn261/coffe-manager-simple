@@ -1,15 +1,25 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import './LoginPage.css'
-import apiService from '../../services/apiService'
+'use client'
 
-const LoginPage = () => {
-    const navigate = useNavigate()
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '../../lib/auth'
+import apiService from '../../services/apiService.js'
+
+export default function LoginPage() {
+    const router = useRouter()
+    const { login, isAuthenticated } = useAuth()
     const [code, setCode] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
 
-    const handleSubmit = async (e) => {
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.push('/')
+        }
+    }, [isAuthenticated, router])
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!code.trim()) {
@@ -23,17 +33,14 @@ const LoginPage = () => {
         try {
             const response = await apiService.auth.login(code.trim())
 
-            const data = response
+            if (response) {
+                // Use auth context to login
+                login(response.apiKey, response.expiresAt)
 
-            if (data) {
-                // Lưu API key vào localStorage
-                localStorage.setItem('apiKey', data.apiKey)
-                localStorage.setItem('apiKeyExpires', data.expiresAt)
-
-                // Chuyển về trang chủ
-                navigate('/')
+                // Redirect to home
+                router.push('/')
             } else {
-                setError(data.message || 'Mã xác thực không đúng')
+                setError('Mã xác thực không đúng')
             }
         } catch (error) {
             console.error('Lỗi xác thực:', error)
@@ -48,11 +55,7 @@ const LoginPage = () => {
             <div className="login-container">
                 <div className="login-card glass-effect">
                     <div className="login-header">
-                        <i className="fas fa-coffee"></i>
-                        <h1 className="page-title">
-                            <i className="fas fa-coffee"></i>
-                            Cafe Manager
-                        </h1>
+                        <h1 className="page-title">☕ Cafe Manager</h1>
                         <p>Nhập mã để truy cập hệ thống</p>
                     </div>
 
@@ -72,43 +75,27 @@ const LoginPage = () => {
 
                         {error && (
                             <div className="error-message">
-                                <i className="fas fa-exclamation-triangle"></i>
-                                {error}
+                                ⚠️ {error}
                                 <button
                                     type="button"
                                     onClick={() => setError('')}
                                     className="close-error"
                                 >
-                                    <i className="fas fa-times"></i>
+                                    ✕
                                 </button>
                             </div>
                         )}
 
                         <button type="submit" className="btn-primary login-btn" disabled={loading}>
-                            {loading ? (
-                                <>
-                                    <i className="fas fa-spinner fa-spin"></i>
-                                    Đang xác thực...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fas fa-sign-in-alt"></i>
-                                    Đăng nhập
-                                </>
-                            )}
+                            {loading ? <>🔄 Đang xác thực...</> : <>🔑 Đăng nhập</>}
                         </button>
                     </form>
 
                     <div className="login-footer">
-                        <p>
-                            <i className="fas fa-info-circle"></i>
-                            Liên hệ quản trị viên để được cấp mã truy cập
-                        </p>
+                        <p>ℹ️ Liên hệ quản trị viên để được cấp mã truy cập</p>
                     </div>
                 </div>
             </div>
         </div>
     )
 }
-
-export default LoginPage

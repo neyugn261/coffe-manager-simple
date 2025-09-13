@@ -1,0 +1,501 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    /* Colors */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-element: var(--element);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+    /* Dark Theme - Modern Purple Management */
+    --background: #0c0a09;
+    --foreground: #fafaf9;
+
+    /* Primary - Elegant Purple for Management */
+    --primary: #8b5cf6;
+    --primary-foreground: #ffffff;
+
+    /* Secondary - Dark Professional Cards */
+    --secondary: #1c1917;
+    --secondary-hover: #292524;
+    --secondary-foreground: #e7e5e4;
+
+    /* Accent - Modern Purple Theme */
+    --accent: #8b5cf6;
+    --accent-hover: #a78bfa;
+    --accent-shadow: #8b5cf640;
+    --accent-foreground: #ffffff;
+
+    /* Element - Modern Card Background */
+    --element: #1c1917;
+
+    /* Input & Borders - Modern Dark */
+    --input: #292524;
+    --input-focus: #3c3530;
+    --border: #3c3530;
+
+    /* Cards - Modern Dark Cards */
+    --card: #1c1917;
+    --card-foreground: #fafaf9;
+
+    /* Popover - Modern Modal */
+    --popover: #0c0a09;
+    --popover-foreground: #fafaf9;
+
+    /* Ring - Purple Focus */
+    --ring: #8b5cf6;
+
+    /* Primary Button States - Modern Management */
+    --primary-hover: #a78bfa;
+    --primary-active: #7c3aed;
+    --primary-disabled: #8b5cf680;
+
+    /* States - Modern Management Colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --destructive: #ef4444;
+    --info: #8b5cf6;
+
+    /* Muted - Modern Gray text */
+    --muted: #292524;
+    --muted-foreground: #a8a29e;
+
+    /* Sidebar - Modern Management Navigation */
+    --sidebar: #0c0a09;
+    --sidebar-foreground: #fafaf9;
+    --sidebar-primary: #8b5cf6;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #292524;
+    --sidebar-accent-foreground: #e7e5e4;
+    --sidebar-border: #3c3530;
+    --sidebar-ring: #8b5cf6;
+
+    /* Charts - Purple Analytics palette */
+    --chart-1: #8b5cf6;
+    --chart-2: #a78bfa;
+    --chart-3: #c4b5fd;
+    --chart-4: #ddd6fe;
+    --chart-5: #ede9fe;
+
+    /* Radius - Modern feel */
+    --radius: 8px;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+        box-sizing: border-box;
+    }
+
+    html {
+        /* Prevent zoom on orientation change on some iOS devices */
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
+    }
+
+    html,
+    body {
+        @apply bg-background text-foreground;
+        font-family: var(--font-text), system-ui, sans-serif;
+        height: 100%;
+        width: 100%;
+        /* Prevent horizontal scroll */
+        overflow-x: hidden;
+    }
+
+    .font-title {
+        font-family: var(--font-title), sans-serif;
+    }
+
+    .font-accent {
+        font-family: var(--font-accent), cursive;
+    }
+
+    /* Custom input number styling */
+    input[type='number'] {
+        -moz-appearance: textfield; /* Firefox */
+    }
+
+    /* Chrome, Safari, Edge, Opera */
+    input[type='number']::-webkit-outer-spin-button,
+    input[type='number']::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Responsive Images */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Prevent zoom on iOS when focusing inputs */
+    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+        input[type='text'],
+        input[type='email'],
+        input[type='password'],
+        input[type='number'],
+        input[type='search'],
+        input[type='tel'],
+        textarea,
+        select {
+            font-size: 16px !important;
+        }
+    }
+
+    /* Touch-friendly button sizes on mobile */
+    @media (max-width: 768px) {
+        button,
+        .btn {
+            min-height: 44px; /* iOS recommended touch target size */
+            touch-action: manipulation; /* Prevents zoom on double tap */
+        }
+    }
+
+    /* Hide scrollbars on mobile for better UX */
+    @media (max-width: 768px) {
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    /* Safe area insets for devices with notches */
+    @supports (padding: max(0px)) {
+        .safe-area-top {
+            padding-top: max(1rem, env(safe-area-inset-top));
+        }
+
+        .safe-area-bottom {
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        }
+    }
+}
+
+/* Login Page Styles */
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 48px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.login-header .page-title {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    color: #333333;
+}
+
+.login-header p {
+    color: #666666;
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+.login-form {
+    margin-bottom: 32px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333333;
+    font-size: 14px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+    transition: border-color 0.2s;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #8b4513;
+}
+
+.login-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 16px;
+    background: #8b4513;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.login-btn:hover {
+    background: #a0521a;
+    transform: translateY(-2px);
+}
+
+.login-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.error-message {
+    background: #fee;
+    color: #c33;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.close-error {
+    background: none;
+    border: none;
+    color: #c33;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    margin-left: 8px;
+}
+
+.login-footer {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-footer p {
+    color: #666666;
+    font-size: 14px;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollbar-track-gray-100::-webkit-scrollbar-track {
+    background-color: #f3f4f6;
+    border-radius: 3px;
+}
+
+.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 3px;
+}
+
+.scrollbar-thumb-gray-300:hover::-webkit-scrollbar-thumb,
+.hover\:scrollbar-thumb-gray-400:hover::-webkit-scrollbar-thumb {
+    background-color: #9ca3af;
+}
+
+/* Beautiful scrollbar for menu list */
+.scrollable-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable-area::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+    margin: 4px 0;
+}
+
+.scrollable-area::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.scrollable-area::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--foreground) / 0.3);
+}
+
+.scrollable-area::-webkit-scrollbar-thumb:active {
+    background: hsl(var(--foreground) / 0.4);
+}
+
+/* Firefox scrollbar */
+.scrollable-area {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) hsl(var(--muted));
+}
+
+/* Primary Button Variants - Professional Management Theme */
+.btn-management {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.btn-management:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--accent-shadow);
+}
+
+.btn-management:active {
+    background: var(--primary-active);
+    transform: translateY(0);
+}
+
+.btn-management:disabled {
+    background: var(--primary-disabled);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Alternative Management Button Styles */
+.btn-management-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.btn-management-outline:hover {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    transform: translateY(-1px);
+}
+
+.btn-management-soft {
+    background: var(--accent-shadow);
+    color: var(--primary);
+    border: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.btn-management-soft:hover {
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+
+/* Success/Action Buttons */
+.btn-success {
+    background: var(--success);
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.btn-success:hover {
+    background: #16a34a;
+    transform: translateY(-1px);
+}
+
+/* Warning/Caution Buttons */
+.btn-warning {
+    background: var(--warning);
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+}
+
+/* Danger/Delete Buttons */
+.btn-danger {
+    background: var(--destructive);
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}

@@ -55,7 +55,7 @@
     --primary-foreground: #ffffff;
 
     /* Secondary - Dark Professional Cards */
-    --secondary: #1c1917;
+    --secondary: #888888;
     --secondary-hover: #292524;
     --secondary-foreground: #e7e5e4;
 
@@ -64,9 +64,6 @@
     --accent-hover: #a78bfa;
     --accent-shadow: #8b5cf640;
     --accent-foreground: #ffffff;
-
-    /* Element - Modern Card Background */
-    --element: #1c1917;
 
     /* Input & Borders - Modern Dark */
     --input: #292524;

@@ -165,6 +165,21 @@ class TableController {
             next(error);
         }
     }
+
+    // DELETE /api/tables/:id - Xóa bàn
+    async deleteTable(req, res) {
+        try {
+            const { id } = req.params;
+            await tableService.deleteTable(parseInt(id));
+            
+            res.json({
+                success: true,
+                message: 'Xóa bàn thành công'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new TableController();

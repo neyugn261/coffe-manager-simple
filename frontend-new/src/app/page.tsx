@@ -1,7 +1,12 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { JSX } from 'react'
 import AuthGuard from '@/components/AuthGuard'
+import { Button } from '@/components/ui/button'
+import { LogOut } from 'lucide-react'
 
 type Feature = {
     id: 'order' | 'menu' | 'revenue'
@@ -52,6 +57,17 @@ function IconChart() {
 }
 
 export default function Home(): JSX.Element {
+    const router = useRouter()
+
+    const handleLogout = () => {
+        // Xóa API key khỏi localStorage
+        localStorage.removeItem('apiKey')
+        localStorage.removeItem('apiKeyExpires')
+
+        // Redirect về login
+        router.replace('/login')
+    }
+
     const features: Feature[] = [
         {
             id: 'order',
@@ -111,7 +127,7 @@ export default function Home(): JSX.Element {
                             <Link
                                 key={feature.id}
                                 href={feature.href}
-                                className="group bg-secondary hover:bg-secondary-hover relative flex min-h-[100px] w-full flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-all duration-300 hover:-translate-y-1 sm:h-32 sm:flex-row sm:items-center sm:gap-4 sm:rounded-2xl sm:p-6 lg:gap-6 lg:p-8"
+                                className="group bg-card hover:bg-card/80 relative flex min-h-[100px] w-full flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-all duration-300 hover:-translate-y-1 sm:h-32 sm:flex-row sm:items-center sm:gap-4 sm:rounded-2xl sm:p-6 lg:gap-6 lg:p-8"
                             >
                                 <div className="flex flex-row items-center justify-start gap-6">
                                     <span className="bg-card text-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-110 sm:h-12 sm:w-12 sm:rounded-xl lg:h-14 lg:w-14">
@@ -142,6 +158,18 @@ export default function Home(): JSX.Element {
                             </Link>
                         ))}
                     </div>
+                </div>
+                {/* Logout button */}
+                <div className="absolute top-4 right-4 z-10">
+                    <Button
+                        onClick={handleLogout}
+                        variant="outline"
+                        size="sm"
+                        className="bg-card hover:bg-card/80 relative flex w-full flex-col items-start gap-3 overflow-hidden rounded-xl border p-5 text-left transition-all duration-300 hover:-translate-y-1 sm:flex-row sm:items-center sm:gap-4 sm:rounded-2xl"
+                    >
+                        Logout
+                        <LogOut />
+                    </Button>
                 </div>
             </div>
         </AuthGuard>

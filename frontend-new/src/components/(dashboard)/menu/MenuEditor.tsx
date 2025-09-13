@@ -147,14 +147,33 @@ export default function MenuEditor() {
     }
 
     return (
-        <div className="flex h-[calc(100vh-180px)] min-h-[600px] flex-col gap-4 *:p-6 lg:gap-6 xl:flex-row xl:items-stretch">
+        <div className="select-nonexl:items-stretch flex h-[calc(100vh-180px)] min-h-[600px] flex-col gap-4 *:p-6 lg:gap-6 xl:flex-row">
             {error && (
-                <div className="bg-destructive/10 text-destructive border-destructive/20 relative rounded-lg border p-4 text-sm">
-                    <div className="flex items-start gap-3">
-                        <div className="text-lg">⚠️</div>
-                        <div>
-                            <div className="font-medium">Có lỗi xảy ra</div>
-                            <div className="mt-1">{error}</div>
+                <div className="animate-in slide-in-from-right-full fixed top-4 right-4 z-50 max-w-md">
+                    <div className="bg-card rounded-lg border p-4 shadow-lg">
+                        <div className="flex items-center justify-evenly gap-3">
+                            <div className="bg-destructive flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full">
+                                <span className="text-foreground text-sm font-medium">!</span>
+                            </div>
+                            <div className="flex min-w-0 flex-1 flex-row items-center">
+                                <p className="text-foreground align-middle text-sm font-medium">
+                                    Có lỗi xảy ra
+                                </p>
+                                <p className="text-foreground mt-1 text-sm">{error}</p>
+                            </div>
+                            <button
+                                onClick={clearError}
+                                className="text-foreground flex-shrink-0 transition-colors hover:text-red-600"
+                            >
+                                <span className="sr-only">Đóng</span>
+                                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>

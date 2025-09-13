@@ -2,28 +2,42 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '../../lib/auth'
-import apiService from '../../services/apiService.js'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import Image from 'next/image'
 
 export default function LoginPage() {
-    const router = useRouter()
-    const { login, isAuthenticated } = useAuth()
     const [code, setCode] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const router = useRouter()
 
-    // Redirect if already authenticated
     useEffect(() => {
-        if (isAuthenticated) {
-            router.push('/')
+        // Nếu đã có API key thì auto redirect về home
+        const apiKey = localStorage.getItem('apiKey')
+        const expires = localStorage.getItem('apiKeyExpires')
+
+        if (apiKey && expires) {
+            const expiresDate = new Date(expires)
+            const now = new Date()
+
+            // Nếu API key còn hạn thì redirect về home
+            if (expiresDate > now) {
+                router.replace('/')
+                return
+            } else {
+                // API key hết hạn thì xóa
+                localStorage.removeItem('apiKey')
+                localStorage.removeItem('apiKeyExpires')
+            }
         }
-    }, [isAuthenticated, router])
+    }, [router])
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
-
         if (!code.trim()) {
-            setError('Vui lòng nhập mã xác thực')
+            setError('Vui lòng nhập mã code')
             return
         }
 
@@ -31,71 +45,82 @@ export default function LoginPage() {
         setError('')
 
         try {
-            const response = await apiService.auth.login(code.trim())
+            const response = await fetch('http://localhost:5000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code }),
+            })
 
-            if (response) {
-                // Use auth context to login
-                login(response.apiKey, response.expiresAt)
+            const data = await response.json()
 
-                // Redirect to home
-                router.push('/')
+            if (data.success) {
+                // Lưu API key vào localStorage
+                localStorage.setItem('apiKey', data.data.apiKey)
+                localStorage.setItem('apiKeyExpires', data.data.expiresAt)
+
+                console.log('✅ Login thành công, API key đã được lưu')
+
+                // Redirect về home
+                router.replace('/')
             } else {
-                setError('Mã xác thực không đúng')
+                setError(data.message || 'Đăng nhập thất bại')
             }
         } catch (error) {
-            console.error('Lỗi xác thực:', error)
-            setError('Có lỗi xảy ra. Vui lòng thử lại.')
+            console.error('Login failed:', error)
+            setError('Lỗi kết nối server')
         } finally {
             setLoading(false)
         }
     }
 
     return (
-        <div className="page">
-            <div className="login-container">
-                <div className="login-card glass-effect">
-                    <div className="login-header">
-                        <h1 className="page-title">☕ Cafe Manager</h1>
-                        <p>Nhập mã để truy cập hệ thống</p>
+        <div className="bg-background flex h-full items-center justify-center px-4">
+            <Card className="w-full max-w-md p-6">
+                <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 flex items-center justify-center rounded-full bg-purple-500">
+                        <Image width={200} height={200} src="/logo.jpg" alt="Logo" />
                     </div>
-
-                    <form onSubmit={handleSubmit} className="login-form">
-                        <div className="form-group">
-                            <label htmlFor="code">Mã xác thực</label>
-                            <input
+                    <CardTitle className="text-foreground text-4xl">Coffee Manager</CardTitle>
+                    <CardDescription className="text-secondary">
+                        Nhập mã code để đăng nhập
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div>
+                            <Input
                                 type="password"
-                                id="code"
+                                placeholder="Nhập mã code"
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
-                                placeholder="Nhập mã xác thực..."
-                                className="input-field"
+                                className="text-center font-mono text-lg"
+                                autoFocus
                                 disabled={loading}
                             />
                         </div>
 
                         {error && (
-                            <div className="error-message">
-                                ⚠️ {error}
-                                <button
-                                    type="button"
-                                    onClick={() => setError('')}
-                                    className="close-error"
-                                >
-                                    ✕
-                                </button>
+                            <div className="rounded-md bg-red-50 p-3 text-center text-sm text-red-500">
+                                {error}
                             </div>
                         )}
 
-                        <button type="submit" className="btn-primary login-btn" disabled={loading}>
-                            {loading ? <>🔄 Đang xác thực...</> : <>🔑 Đăng nhập</>}
-                        </button>
+                        <Button
+                            type="submit"
+                            className="w-full bg-purple-500 hover:bg-purple-600"
+                            disabled={loading || !code.trim()}
+                        >
+                            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                        </Button>
                     </form>
 
-                    <div className="login-footer">
-                        <p>ℹ️ Liên hệ quản trị viên để được cấp mã truy cập</p>
-                    </div>
-                </div>
-            </div>
+                    <p className="mt-6 text-center text-xs text-stone-500">
+                        Vui lòng liên hệ admin để nhận code!
+                    </p>
+                </CardContent>
+            </Card>
         </div>
     )
 }
